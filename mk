@@ -5,7 +5,7 @@ import sys
 import re
 import argparse
 
-version = '1.0'
+version = '1.1'
 description = f'Makefile generator and runner'
 
 class Target:
@@ -147,7 +147,7 @@ def generate_makefile(path, debug=False):
         makefile.write(f'# All Targets:\n')
         makefile.write('all: ')
         target_names = [f"$({t.name.upper()}_EXE)" for t in targets]
-        makefile.write(' \\\n '.join(target_names) + '\n\n')                         # default target
+        makefile.write(' \\\n '.join(target_names) + '\n\n')                # default target
 
         # Targets
         makefile.write(f'# Targets:\n')
