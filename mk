@@ -5,7 +5,7 @@ import sys
 import re
 import argparse
 
-version = '1.1'
+version = '1.2'
 description = f'Makefile generator and runner'
 
 class Target:
