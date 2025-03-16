@@ -28,8 +28,11 @@ class Target:
         all_source_files = cpp_source_files + c_source_files
         self.deps += [f.rsplit('.', 1)[0] + '.o' for f in all_source_files]
 
-        all_cpp_files = [f for f in os.listdir(self.path) if f.endswith('.cpp')]
-        all_c_files = [f for f in os.listdir(self.path) if f.endswith('.c')]
+        all_cpp_files = []
+        all_c_files = []
+        for root, _, files in os.walk(self.path):
+            all_cpp_files.extend([os.path.join(root, f).lstrip('./') for f in files if f.endswith('.cpp')])
+            all_c_files.extend([os.path.join(root, f).lstrip('./') for f in files if f.endswith('.c')])
 
         # check if the header files have corresponding source files
         for header in header_files:
