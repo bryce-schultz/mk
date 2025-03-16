@@ -95,7 +95,7 @@ def find_target(path, files):
                 return f.rsplit('.', 1)[0]
     return None
 
-def generate_makefile(path, debug=False):
+def generate_makefile(path, args):
     # find the target
     targets = find_all_targets(path)
     if len(targets) == 0:
@@ -115,7 +115,7 @@ def generate_makefile(path, debug=False):
         makefile.write(f'# Compiler Options:\n')
         makefile.write(f'CC = g++\n')                                       # default compiler
         makefile.write(f'CPPFLAGS = -Wall -Wextra -Wpedantic\n')            # default cpp flags
-        if (debug):
+        if (args.debug):
             makefile.write(f'CPPFLAGS += -ggdb\n')                          # debug flags
         makefile.write(f'LDFLAGS = -lm\n\n')                                # default linker flags
 
@@ -179,6 +179,7 @@ def generate_makefile(path, debug=False):
         # Dependencies
         makefile.write(f'# Dependencies:\n')
         makefile.write(get_deps(path))                                      # dependencies
+        print('-> Makefile')
 
 def run_make(make_args):
     cmd = 'make ' + ' '.join(make_args)
@@ -212,7 +213,7 @@ def main(args):
         print_overwrite_warning(path)
         sys.exit(1)
 
-    generate_makefile(path, args.debug)
+    generate_makefile(path, args)
 
     if args.run:
         make_args = build_make_args(args)
@@ -225,6 +226,6 @@ if __name__ == '__main__':
     parser.add_argument('-B', '--always-make', action='store_true', help='unconditionally make all targets')
     parser.add_argument('-v', '--version', action='version', version=version)
     parser.add_argument('-c', '--clean', action='store_true', help='clean the directory')
-    parser.add_argument('-g', '--debug', action='store_true', help='print debug information')
+    parser.add_argument('-g', '--debug', action='store_true', help='enable debug flags')
     parser.add_argument('-r', '--run', action='store_true', help='run the make command')
     main(parser.parse_args())
