@@ -163,6 +163,8 @@ def write_dependencies(makefile, deps):
     makefile.write('\n')
 
 def write_options(makefile, options):
+    if (options == ''):
+        return
     makefile.write(f'# Options from .mk file:\n')
     makefile.write(options)
 
