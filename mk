@@ -167,6 +167,7 @@ def write_options(makefile, options):
         return
     makefile.write(f'# Options from .mk file:\n')
     makefile.write(options)
+    makefile.write('\n')
 
 def read_options(path):
     # read the .mk file and copy its contents into the makefile here:
