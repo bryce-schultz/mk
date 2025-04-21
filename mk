@@ -5,13 +5,21 @@ import sys
 import re
 import argparse
 
-version = '1.3'
+version = '1.5'
 description = f'Makefile generator and runner'
+
+isatty = os.isatty(sys.stdout.fileno())
+yellow = '\033[93m' if isatty else ''
+red = '\033[91m' if isatty else ''
+green = '\033[92m' if isatty else ''
+reset = '\033[0m' if isatty else ''
 
 class Target:
     def __init__(self, file, path='.'):
         self.file = file
         self.path = path
+        self.iscpp = file.endswith('.cpp')
+        self.isc = file.endswith('.c')
         self.name = file.rsplit('.', 1)[0]
         self.deps = []
         self._find_deps(file)
@@ -71,7 +79,7 @@ def run_cmd(cmd, show_output=False):
         try:
             result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
-            print(e.stderr.decode())
+            print(f'{red}error{reset}: {e.stderr.decode()}')
             return None
         return result.stdout.decode()
 
@@ -104,10 +112,11 @@ def write_header(makefile, targets):
 
 def write_compiler_options(makefile):
     makefile.write(f'# Compiler Options:\n')
-    makefile.write(f'CC = g++\n')                                       # default compiler
-    makefile.write(f'CPPFLAGS = -Wall -Wextra -pedantic\n')             # default cpp flags
-    makefile.write(f'CFLAGS = -Wall -Wextra -pedantic\n')                         # default cpp standard
-    makefile.write(f'LDFLAGS = \n\n')                                   # default linker flags
+    makefile.write(f'CXXC = g++\n')                                     # default cpp compiler
+    makefile.write(f'CC = gcc\n')                                       # default c compiler
+    makefile.write(f'CXXFLAGS = -Wall -Wextra -pedantic\n')             # default cpp flags
+    makefile.write(f'CFLAGS = -Wall -Wextra -pedantic\n')               # default cpp standard
+    makefile.write(f'LDFLAGS = -lm\n\n')                                # default linker flags
 
 def write_target_executables(makefile, targets):
     makefile.write(f'# Target Executables:\n')
@@ -139,7 +148,10 @@ def write_targets(makefile, targets):
         target_name_all_caps = target.name.upper()
         exec_name = f'$({target_name_all_caps}_EXE)'
         makefile.write(f'{exec_name}: $({target_name_all_caps}_OBJS)\n')
-        makefile.write(f'\t$(CC) $(CPPFLAGS) $({target_name_all_caps}_OBJS) -o {exec_name} $(LDFLAGS)\n')
+        if target.iscpp:
+            makefile.write(f'\t$(CXXC) $(CXXFLAGS) $({target_name_all_caps}_OBJS) -o {exec_name} $(LDFLAGS)\n')
+        else:
+            makefile.write(f'\t$(CC) $(CFLAGS) $({target_name_all_caps}_OBJS) -o {exec_name} $(LDFLAGS)\n')
     makefile.write('\n')
 
 def write_clean(makefile, targets):
@@ -153,7 +165,7 @@ def write_clean(makefile, targets):
 def write_rules(makefile):
     makefile.write(f'# Rules:\n')
     makefile.write(f'.cpp.o:\n')                                        # rules for .cpp files
-    makefile.write(f'\t$(CC) $(CPPFLAGS) -c $< -o $@\n')
+    makefile.write(f'\t$(CXXC) $(CXXFLAGS) -c $< -o $@\n')
     makefile.write(f'.c.o:\n')                                          # rules for .c files
     makefile.write(f'\t$(CC) $(CFLAGS) -c $< -o $@\n\n')
 
@@ -183,7 +195,7 @@ def generate_makefile(path, args):
     # find the target
     targets = find_all_targets(path)
     if len(targets) == 0:
-        print(f'Error: No target found in {path}')
+        print(f'{red}error{reset}: No target found in {path}')
         sys.exit(1)
 
     # write the Makefile
@@ -229,9 +241,9 @@ def run_make(make_args):
 
 def print_overwrite_warning(path):
     if (path == '.'):
-        print(f'Warning: This will overwrite the Makefile in the current directory')
+        print(f'{yellow}warning{reset}: this will overwrite the Makefile in the current directory')
     else:
-        print(f'Warning: This will overwrite the Makefile in {path}')
+        print(f'{yellow}warning{reset}: this will overwrite the Makefile in {path}')
 
 def build_make_args(args):
     make_args = []
@@ -243,17 +255,31 @@ def build_make_args(args):
         make_args.append('clean')
     return make_args
 
+def prompt_overwrite(path):
+    print_overwrite_warning(path)
+    answer = input('Do you want to overwrite it? (y/n): ')
+    if answer.lower() != 'y':
+        return False
+    return True
+
+def check_makefile_override(path):
+    if os.path.exists(f'{path}/Makefile') and not os.path.exists(f'{path}/.mk'):
+        return prompt_overwrite(path)
+    return True
+    
 def main(args):
     path = args.path
     if not os.path.exists(path):
-        print(f'Path {path} does not exist')
+        print(f'{red}error{reset}: path {path} does not exist')
         sys.exit(1)
 
-    # if the path doesnt contain a .mk file exit with a warning that it will overwrite the Makefile
+    if not check_makefile_override(path):
+        sys.exit(0)
+
     if not os.path.exists(f'{path}/.mk'):
-        print(f'Error: no .mk file found. Create this file to use mk, you can specify a custom target in the first line if so desired')
-        print_overwrite_warning(path)
-        sys.exit(1)
+        # create .mk file
+        with open(f'{path}/.mk', 'w') as mkfile:
+            mkfile.close()
 
     generate_makefile(path, args)
 
