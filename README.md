@@ -55,19 +55,13 @@ Executable files will have a variable target created called `<FILENAME>_EXE` and
 
 ## Example
 
-1. Create a `.mk` file in your project directory:
-
-    ```sh
-    touch .mk
-    ```
-
-2. Run the `mk` command:
+1. Run the `mk` command:
 
     ```sh
     mk
     ```
 
-3. A `Makefile` will be generated and it will use any options specified in the `.mk` file. You can now run `make` as usual.
+2. A `Makefile` will be generated and it will use any options specified in the `.mk` file. You can now run `make` as usual.
 
     ```sh
     make
