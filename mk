@@ -182,13 +182,7 @@ def read_options(path):
                     mkfile_contents += '\n'
             return mkfile_contents
 
-def generate_makefile(path, args):
-    # find the target
-    targets = find_all_targets(path)
-    if len(targets) == 0:
-        print(f'{red}error{reset}: No target found in {path}')
-        sys.exit(1)
-
+def generate_makefile(path, targets):
     # write the Makefile
     with open(f'{path}/Makefile', 'w') as makefile:
         # Header
@@ -267,12 +261,17 @@ def main(args):
     if not check_makefile_override(path):
         sys.exit(0)
 
+    targets = find_all_targets(path)
+    if len(targets) == 0:
+        print(f'{red}error{reset}: No target found in {path}')
+        sys.exit(1)
+
     if not os.path.exists(f'{path}/.mk'):
         # create .mk file
         with open(f'{path}/.mk', 'w') as mkfile:
             mkfile.close()
 
-    generate_makefile(path, args)
+    generate_makefile(path, targets)
 
     if args.run:
         make_args = build_make_args(args)
