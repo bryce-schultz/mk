@@ -8,6 +8,12 @@ to ensure the user accepts that it will override any Makefile where mk is ran.
 - Generates Makefiles from a project structure
 - Supports building multiple exes
 - Supports various command-line arguments
+- Builtin include dir support (INCLUDE_DIRS)
+
+## TODOS
+
+- Add a way to configure the default compiler and other options, maybe a .mkconf file in ~
+- Per target include dirs
 
 ## Installation
 
@@ -49,6 +55,7 @@ The `.mk` file may contain additional configuration options for generating the `
 ```mk
 CPPFLAGS += -g # add debugging to the compile options
 MAIN_EXE = calculator # change the name of the exe made from main.cpp
+INCLUDE_DIRS = /path/to/include
 ```
 
 Executable files will have a variable target created called `<FILENAME>_EXE` and so it can be overriden for any executable. For example `main.cpp` would become `MAIN_EXE`, `book_program.c` would become `BOOK_PROGRAM_EXE`, and `FunProgram.cpp` would become `FUNPROGRAM_EXE`.

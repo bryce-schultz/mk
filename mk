@@ -5,7 +5,7 @@ import sys
 import re
 import argparse
 
-version = '2.0'
+version = '2.1'
 description = f'Makefile generator and runner'
 
 isatty = os.isatty(sys.stdout.fileno())
@@ -103,11 +103,11 @@ def write_header(makefile, targets):
 
 def write_compiler_options(makefile):
     makefile.write(f'# Compiler Options:\n')
-    makefile.write(f'CXXC = g++\n')                                     # default cpp compiler
-    makefile.write(f'CC = gcc\n')                                       # default c compiler
-    makefile.write(f'CXXFLAGS = -Wall -Wextra -pedantic\n')             # default cpp flags
-    makefile.write(f'CFLAGS = -Wall -Wextra -pedantic\n')               # default cpp standard
-    makefile.write(f'LDFLAGS = -lm\n\n')                                # default linker flags
+    makefile.write(f'CXXC = g++\n')                                                                     # default cpp compiler
+    makefile.write(f'CC = gcc\n')                                                                       # default c compiler
+    makefile.write(f'CXXFLAGS = -Wall -Wextra -pedantic $(addprefix -I, $(INCLUDE_DIRS))\n')            # default cpp flags
+    makefile.write(f'CFLAGS = -Wall -Wextra -pedantic $(addprefix -I, $(INCLUDE_DIRS))\n')              # default cpp standard
+    makefile.write(f'LDFLAGS = -lm\n\n')                                                                # default linker flags
 
 def write_target_executables(makefile, targets):
     makefile.write(f'# Target Executables:\n')
