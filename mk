@@ -224,12 +224,6 @@ def run_make(make_args):
     cmd = 'make ' + ' '.join(make_args)
     run_cmd(cmd, show_output=True)
 
-def print_overwrite_warning(path):
-    if (path == '.'):
-        print(f'{yellow}warning{reset}: this will overwrite the Makefile in the current directory')
-    else:
-        print(f'{yellow}warning{reset}: this will overwrite the Makefile in {path}')
-
 def build_make_args(args):
     make_args = []
     if args.jobs:
@@ -239,6 +233,12 @@ def build_make_args(args):
     if args.clean:
         make_args.append('clean')
     return make_args
+
+def print_overwrite_warning(path):
+    if (path == '.'):
+        print(f'{yellow}warning{reset}: this will overwrite the Makefile in the current directory')
+    else:
+        print(f'{yellow}warning{reset}: this will overwrite the Makefile in {path}')
 
 def prompt_overwrite(path):
     print_overwrite_warning(path)
